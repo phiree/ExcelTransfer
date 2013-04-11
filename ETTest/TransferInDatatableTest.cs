@@ -38,9 +38,17 @@ namespace ETTest
                 string erpOut = Environment.CurrentDirectory + @"\testresource\out标准格式物料.XLS";
         
             DataTable dt = td.JoinXslToDataTable(baojia, bianma, gongyingshang, erp);
-            Assert.AreEqual(1, dt.Rows.Count);
+            Assert.AreEqual(2, dt.Rows.Count);
             td.CreateXslFromDataTable(dt, erp, erpOut);
 
+            string baojia1756 = Environment.CurrentDirectory + @"\testresource\NTS产品报价单1756.xls";
+            string bianma2130 = Environment.CurrentDirectory + @"\testresource\NTS编码表2130.xls";
+            string gongyingshang104 = Environment.CurrentDirectory + @"\testresource\供应商编码104.xls";
+            string erpOut1756 = Environment.CurrentDirectory + @"\testresource\out标准格式物料1728.XLS";
+
+            DataTable dt1728 = td.JoinXslToDataTable(baojia1756, bianma2130, gongyingshang104, erp);
+           Assert.AreEqual(1750, dt1728.Rows.Count);
+            td.CreateXslFromDataTable(dt1728, erp, erpOut1756);
 
         }
     }
