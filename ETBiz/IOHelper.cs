@@ -28,10 +28,16 @@ namespace ETBiz
             {
                 DirectoryInfo di = Directory.CreateDirectory(directory);
             }
-            fi.Create();
+            FileStream fs = fi.Create();
+            fs.Close();
             return fi;
 
 
         }
+    }
+
+    public class TextHelper
+    { 
+     
     }
 }

@@ -6,6 +6,8 @@ using System.Text;
 using System.Data;
 using System.IO;
 using NPOI.HSSF.UserModel;
+using System.Globalization;
+using System.Text.RegularExpressions;
 namespace ETBiz
 {
     /// <summary>
@@ -13,21 +15,22 @@ namespace ETBiz
     /// </summary>
     public class TransferInDatatable
     {
-
+        SerialNumberManager serialNumberManager = new SerialNumberManager();
+         
         DataSet ds = new DataSet();
         /// <summary>
-        /// 
+        /// 根据产品报价单和供应商编码生成物料表
         /// </summary>
         /// <param name="xslPathBaojia">报价单</param>
         /// <param name="xslPathBianma">编码表</param>
         /// <param name="xslPathSupplier">供应商列表</param>
         /// <param name="xslPathErp">标准erp物料表</param>
-        public DataTable JoinXslToDataTable(string xslPathBaojia, string xslPathBianma, string xslPathSupplier, string xslPathErp)
+        public DataTable JoinXslToDataTable(string xslPathBaojia,  string xslPathSupplier, string xslPathErp)
         {
             DataTable dtBaoJia = CreateFromXsl(xslPathBaojia);
             Console.WriteLine("报价单行数:" + dtBaoJia.Rows.Count);
-            DataTable dtBianma = CreateFromXsl(xslPathBianma);
-            Console.WriteLine("编码表行数:" + dtBianma.Rows.Count);
+            //DataTable dtBianma = CreateFromXsl(xslPathBianma);
+            //Console.WriteLine("编码表行数:" + dtBianma.Rows.Count);
 
             DataTable dtErp = CreateFromXsl(xslPathErp);
 
@@ -49,30 +52,30 @@ namespace ETBiz
             //
             // var resultsNoSuppier= from ttBaojia in dtBaoJia.AsEnumerable()
             var results = from ttBaojia in dtBaoJia.AsEnumerable()
-                          join ttBianma in dtBianma.AsEnumerable()
+                         // join ttBianma in dtBianma.AsEnumerable()
 
                         //   where 
 
                          // join ttSupplier in dtSupplier.AsEnumerable()
-                          on
+                         // on
 
-                            ttBaojia.Field<string>("总编码") equals
-                               ttBianma.Field<string>("总编码")
+                         //   ttBaojia.Field<string>("总编码") equals
+                           //    ttBianma.Field<string>("总编码")
                           //where
                           //   !string.IsNullOrEmpty( ttBaojia.Field<string>("产品型号").Trim())&&ttBaojia.Field<string>("分类编码") == (ttBianma.Field<string>("产品大类编码") +"."+ ttBianma.Field<string>("产品小类编码"))
 
                           join ttSupplier in dtSupplier.AsEnumerable()
               on
-               ttBianma.Field<string>("供应商编码")
+               ttBaojia.Field<string>("供应商名称")
                equals
-                   ttSupplier.Field<string>("供应商编码")
+                   ttSupplier.Field<string>("供应商名称")
 
                           select new
                            {
-                               代码 = ttBianma.Field<string>("总编码"),
+                               分类编码 = ttBaojia.Field<string>("分类编码"),
                                名称 = ttBaojia.Field<string>("产品名称"),
                                明细 = "TRUE",
-                               物料型号 = ttBianma.Field<string>("产品型号"),
+                               物料型号 = ttBaojia.Field<string>("产品型号"),
                                基本计量单位_FName = ttBaojia.Field<string>("单位"),
                                规格型号 = ttBaojia.Field<string>("规格/参数"),
                                备注 = ttBaojia.Field<string>("产地"),
@@ -88,11 +91,32 @@ namespace ETBiz
             foreach (var r in results)
             {
                 DataRow newRow = dtErp.NewRow();
-                newRow["代码"] = r.代码;
+                newRow["代码"] = BuildNtsCode(r.分类编码,r.来源_FNumber);
                 newRow["备注"] = r.备注 + r.产品描述;
-                newRow["固定提前期"] = r.固定提前期;
+
+              
                 newRow["规格型号"] = r.规格型号;
-                newRow["含税出厂价"] = r.含税出厂价;
+                Console.WriteLine(r.含税出厂价);
+
+                decimal price = 0;
+                if (!string.IsNullOrEmpty(r.含税出厂价))
+                {
+                    price = decimal.Parse(Regex.Replace(r.含税出厂价, @"[^\d.]", ""));
+                }
+                int 生产周期 = 0;
+
+                if (!string.IsNullOrEmpty(r.固定提前期))
+                {
+                    生产周期 = int.Parse(Regex.Replace(r.固定提前期, @"[^\d.]", ""));
+                }
+                int 最小订货量 = 0;
+
+                if (!string.IsNullOrEmpty(r.最小订货量))
+                {
+                    最小订货量 = int.Parse(Regex.Replace(r.最小订货量, @"[^\d.]", ""));
+                }
+                newRow["固定提前期"] = 生产周期;
+                newRow["含税出厂价"] = price;// decimal.Parse(r.含税出厂价, NumberStyles.AllowCurrencySymbol | NumberStyles.Number); //r.含税出厂价;
                 newRow["基本计量单位_FName"] = r.基本计量单位_FName;
                 newRow["来源_FName"] = r.来源_FName;
                 newRow["来源_FNumber"] = r.来源_FNumber;
@@ -100,7 +124,62 @@ namespace ETBiz
                 newRow["明细"] = r.明细;
                 newRow["税率(%)"] = r.税率;
                 newRow["物料型号"] = r.物料型号;
-                newRow["最小订货量"] = r.最小订货量;
+                newRow["最小订货量"] = 最小订货量;
+                newRow["最大订货量"] = 最小订货量*10;
+                newRow["物料属性_FName"] = "外购";
+                newRow["物料分类_FName"] = "主推商品";
+                newRow["计量单位组_FName"] = "数量组";
+
+                newRow["基本计量单位_FGroupName"] = "数量组";
+                newRow["基本计量单位_FName"] = "个";
+
+                newRow["采购计量单位_FName"] = "个";
+                newRow["采购计量单位_FGroupName"] = "数量组";
+                newRow["销售计量单位_FName"] = "个";
+                newRow["销售计量单位_FGroupName"] = "数量组";
+                newRow["生产计量单位_FName"] = "个";
+                newRow["生产计量单位_FGroupName"] = "数量组";
+                newRow["库存计量单位_FName"] = "个";
+                newRow["库存计量单位_FGroupName"] = "数量组";
+
+                newRow["辅助计量单位换算率"] = "0";
+                newRow["默认仓库_FName"] = "一号仓";
+                newRow["默认仓库_FNumber"] = "0001";
+                newRow["默认仓位_FName"] = "*";
+                newRow["默认仓位_FGroupName"] = "*";
+
+                newRow["数量精度"] = "4";
+                newRow["最低存量"] = "1";
+                newRow["最高存量"] = "11000";
+                newRow["安全库存数量"] = "2";
+                newRow["使用状态_FName"] = "使用";
+                newRow["是否为设备"] = "False";
+
+                newRow["存货科目代码_FNumber"] = "1001";
+                newRow["销售收入科目代码_FNumber"] = "1001";
+                newRow["销售成本科目代码_FNumber"] = "1001";
+                newRow["计划模式_FName"] = "MTS计划模式";
+                newRow["计价方法_FName"] = "加权平均法";
+                newRow["变动提前期批量"] = "1";
+                newRow["看板容量"] = "1";
+                newRow["单价精度"] = "2";
+                newRow["变动提前期"] = "0";
+                newRow["标准加工批量"] = "1";
+                newRow["使用状态_FName"] = "使用";
+                newRow["使用状态_FName"] = "使用";
+                newRow["使用状态_FName"] = "使用";
+                newRow["使用状态_FName"] = "使用";
+                newRow["使用状态_FName"] = "使用";
+                newRow["使用状态_FName"] = "使用";
+                newRow["使用状态_FName"] = "使用";
+                newRow["使用状态_FName"] = "使用";
+                newRow["使用状态_FName"] = "使用";
+                newRow["使用状态_FName"] = "使用";
+                newRow["使用状态_FName"] = "使用";
+                newRow["使用状态_FName"] = "使用";
+
+
+
                 dtErp.Rows.Add(newRow);
             }
             return dtErp;
@@ -191,16 +270,17 @@ namespace ETBiz
         /// 生成nts编码
         /// </summary>
         /// <param name="catelogCode"></param>
-        private void BuildNtsCode(string catelogCode,string suppierCode)
-        { 
+        public string BuildNtsCode(string catelogCode,string suppierCode)
+        {
+            string baseNumber=catelogCode+"."+suppierCode;
             //获取当前分类和当前供应商的最大编码
-            int maxNumber = 1;
+            int serialNumber = serialNumberManager.GetSerialNo(baseNumber);
             //新编码
-            int newNumber = maxNumber + 1;
-            string newSerialNumber = "0000" + newNumber;
+            string newSerialNumber = "0000" + serialNumber;
             newSerialNumber = newSerialNumber.Substring(newSerialNumber.Length - 5, 5);
-            string ntsCode = catelogCode + newSerialNumber;
-
+            string ntsCode = baseNumber+ newSerialNumber;
+            return ntsCode;
         }
+        
     }
 }
