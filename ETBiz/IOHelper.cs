@@ -16,6 +16,11 @@ namespace ETBiz
 
             return result;
         }
+        /// <summary>
+        /// 保证文件存在
+        /// </summary>
+        /// <param name="filepath"></param>
+        /// <returns></returns>
         public static FileInfo EnsureFile(string filepath)
         {
             FileInfo fi = new FileInfo(filepath);
@@ -23,16 +28,27 @@ namespace ETBiz
             {
                 return fi;
             }
-            string directory = Path.GetDirectoryName(filepath);
-            if (!Directory.Exists(directory))
-            {
-                DirectoryInfo di = Directory.CreateDirectory(directory);
-            }
+            EnsureFileDirectory(filepath);
+
             FileStream fs = fi.Create();
             fs.Close();
             return fi;
 
 
+        }
+
+        /// <summary>
+        /// 保证路径中的目录都存在
+        /// </summary>
+        /// <param name="filePath"></param>
+        public static void EnsureFileDirectory(string filePath)
+        {
+            string directory = Path.GetDirectoryName(filePath);
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+                
+            }
         }
     }
 

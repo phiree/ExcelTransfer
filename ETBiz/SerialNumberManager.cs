@@ -10,7 +10,7 @@ namespace ETBiz
     /// </summary>
     public class SerialNumberManager
     {
-        Dictionary<string, int> originalSerialList=new  Dictionary<string,int>();
+        Dictionary<string, int> originalSerialList = new Dictionary<string, int>();
 
 
         public SerialNumberManager()
@@ -26,21 +26,25 @@ namespace ETBiz
                 string[] values = line.Split('|');
                 if (values.Length != 2)
                 {
-                    throw new Exception("格式有误."+line);
+                    throw new Exception("格式有误." + line);
                 }
                 string key = values[0];
                 string value = values[1];
                 int number;
                 if (!int.TryParse(value, out number))
                 {
-                    throw new Exception("序列号格式有误,应该是数字."+line);
-             
+                    throw new Exception("序列号格式有误,应该是数字." + line);
+
                 }
                 originalSerialList.Add(key, number);
             }
         }
         public void WriteSerialNumberFile()
         {
+            //备份上次上次的文件
+            string backupFilePath = Environment.CurrentDirectory + @"\backup\SerialNumber" + DateTime.Now.ToString("yyyy-MM-dd-hh_mm_ss");
+            IOHelper.EnsureFileDirectory(backupFilePath);
+            File.Copy(GlobalVariables.SerialNumberFile, backupFilePath);
             StringBuilder sb = new StringBuilder();
             foreach (KeyValuePair<string, int> serialnumber in originalSerialList)
             {
@@ -49,15 +53,34 @@ namespace ETBiz
             }
             File.WriteAllText(GlobalVariables.SerialNumberFile, sb.ToString());
         }
-        public int GetSerialNo(string baseNumber)
+        public int GetSerialNo(string baseNumber, bool test)
         {
-            if (!originalSerialList.ContainsKey(baseNumber))
+            if (test)
             {
-                originalSerialList.Add(baseNumber, 1);
+                if (!originalSerialList.ContainsKey(baseNumber))
+                {
+                    return 1;
+                }
+                else
+                {
+
+                    return originalSerialList[baseNumber];
+
+                }
             }
             else
             {
-                originalSerialList[baseNumber] = originalSerialList[baseNumber] + 1;
+
+                if (!originalSerialList.ContainsKey(baseNumber))
+                {
+                    originalSerialList.Add(baseNumber, 1);
+                }
+                else
+                {
+
+                    originalSerialList[baseNumber] = originalSerialList[baseNumber] + 1;
+
+                }
             }
             return originalSerialList[baseNumber];
         }

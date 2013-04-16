@@ -14,9 +14,10 @@ namespace ETTest
         [Test]
         public void SerialNumberTest()
         {
-            Assert.AreEqual(1,snm.GetSerialNo("01.012.00001"));
-            Assert.AreEqual(2, snm.GetSerialNo("01.012.00001"));
-           // snm.WriteSerialNumberFile();
+            Assert.AreEqual(1,snm.GetSerialNo("01.012.00001",false));
+           
+            Assert.AreEqual(2, snm.GetSerialNo("01.012.00001",false));
+            snm.WriteSerialNumberFile();
         }
     }
 }

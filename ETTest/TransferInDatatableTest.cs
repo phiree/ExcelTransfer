@@ -14,8 +14,7 @@ namespace ETTest
         public void JoinXslToDataTableTest()
         {
             TransferInDatatable td = new TransferInDatatable();
-            string erp = Environment.CurrentDirectory + @"\testresource\标准格式物料.XLS";
-
+         
             //string baojia = Environment.CurrentDirectory + @"\testresource\NTS产品报价单.xls";
             //string bianma = Environment.CurrentDirectory + @"\testresource\NTS编码表.xls";
             //string gongyingshang = Environment.CurrentDirectory + @"\testresource\供应商编码.xls";
@@ -25,16 +24,14 @@ namespace ETTest
             //DataTable dt = td.JoinXslToDataTable(baojia, bianma, gongyingshang, erp);
             //Assert.AreEqual(2, dt.Rows.Count);
             //td.CreateXslFromDataTable(dt, erp, erpOut);
-
-            string baojia1756 = Environment.CurrentDirectory + @"\testresource\NTS产品报价单1756.xls";
+            Console.WriteLine(DateTime.Now);
+            string baojia1756 = Environment.CurrentDirectory + @"\测试文件\NTS产品报价单1756.xls";
             //string bianma2130 = Environment.CurrentDirectory + @"\testresource\NTS编码表2130.xls";
-            string gongyingshang104 = Environment.CurrentDirectory + @"\testresource\供应商编码104.xls";
-            string erpOut1756 = Environment.CurrentDirectory + @"\testresource\物料.XLS";
-
-            DataTable dt1728 = td.JoinXslToDataTable(baojia1756, gongyingshang104, erp);
-            Assert.AreEqual(1750, dt1728.Rows.Count);
-            td.CreateXslFromDataTable(dt1728, erp, erpOut1756);
-
+          
+            DataTable dt1728 = td.JoinXslToDataTable(baojia1756,true);
+            Assert.AreEqual(6, dt1728.Rows.Count);
+            td.CreateXslFromDataTable(dt1728,true);
+            Console.WriteLine(DateTime.Now);
 
 
         }
@@ -59,7 +56,7 @@ namespace ETTest
         public void BuildNtsCodeTest()
         {
             TransferInDatatable td = new TransferInDatatable();
-            Assert.AreEqual("01.012.0000400001", td.BuildNtsCode("01.012", "00004"));
+            Assert.AreEqual("01.012.0000400001", td.BuildNtsCode("01.012", "00004",true));
             
         }
 

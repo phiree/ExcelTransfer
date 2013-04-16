@@ -48,28 +48,28 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="testresource\NTS产品报价单.xls">
+    <None Include="标准格式\供应商列表.xls">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="testresource\NTS产品报价单1756.xls">
+    <None Include="测试文件\NTS产品报价单.xls">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="testresource\NTS编码表.xls">
+    <None Include="测试文件\NTS产品报价单1756.xls">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="testresource\NTS编码表2130.xls">
+    <None Include="测试文件\NTS编码表.xls">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="testresource\供应商编码.xls">
+    <None Include="测试文件\NTS编码表2130.xls">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="testresource\供应商编码104.xls">
+    <None Include="测试文件\供应商编码.xls">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="testresource\标准格式物料.XLS">
+    <None Include="测试文件\供应商编码104.xls">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="testresource\物料分类表\物料.XLS">
+    <None Include="标准格式\ERP物料格式.xls">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
